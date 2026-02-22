@@ -1,17 +1,18 @@
 import requests
 import sqlite3
 import os
-import re
 from datetime import datetime
+from bs4 import BeautifulSoup
 
 OPENAI_API_KEY = os.environ["OPENAI_API_KEY"]
 PUSHOVER_USER_KEY = os.environ["PUSHOVER_USER_KEY"]
 PUSHOVER_API_TOKEN = os.environ["PUSHOVER_API_TOKEN"]
 
 YOUR_PREFERENCES = """
-- Small to medium sized dog (under 40 lbs preferred)
+- Small to medium-sized dog (under 25 lbs preferred)
 - Good with other dogs (I have two dachshunds)
 - Under 5 years old preferred
+- Poodle preferred
 - Generally cute, friendly-looking face
 """
 
@@ -30,37 +31,36 @@ def mark_seen(conn, dog_id, name):
     conn.commit()
 
 def fetch_dogs():
-    from playwright.sync_api import sync_playwright
+    resp = requests.get(
+        "https://www.adoptapet.com/shelter/73753/available-pets",
+        headers={"User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36"}
+    )
+    soup = BeautifulSoup(resp.text, "html.parser")
+    dogs = []
 
-    with sync_playwright() as p:
-        browser = p.chromium.launch()
-        page = browser.new_page()
-        dogs = []
+    for card in soup.select("a[href*='/pet/']"):
+        name = card.get_text(strip=True)
+        href = card.get("href", "")
+        pet_id = href.split("/pet/")[-1].strip("/").split("-")[0]
+        if pet_id and name:
+            dogs.append({
+                "ID": pet_id,
+                "Name": name,
+                "Breed": "Unknown",
+                "Age": "Unknown",
+                "Weight": "unknown",
+                "Description": ""
+            })
 
-        def handle_response(response):
-            if "shelterluv.com/api" in response.url and response.status == 200:
-                try:
-                    data = response.json()
-                    if isinstance(data, dict) and "animals" in data:
-                        for a in data["animals"]:
-                            dogs.append({
-                                "ID": a.get("ID") or a.get("InternalID"),
-                                "Name": a.get("Name"),
-                                "Breed": a.get("Breed") or a.get("PrimaryBreed"),
-                                "Age": a.get("Age"),
-                                "Weight": a.get("Weight", "unknown"),
-                                "Description": a.get("Description", "")
-                            })
-                except:
-                    pass
+    seen_ids = set()
+    unique = []
+    for d in dogs:
+        if d["ID"] not in seen_ids:
+            seen_ids.add(d["ID"])
+            unique.append(d)
 
-        page.on("response", handle_response)
-        page.goto("https://www.shelterluv.com/matchme/available/MILO/Dog")
-        page.wait_for_timeout(5000)
-        browser.close()
-
-    print(f"Found {len(dogs)} available dogs")
-    return dogs
+    print(f"Found {len(unique)} available dogs")
+    return unique
 
 def is_good_match(dog):
     import openai
@@ -86,13 +86,13 @@ Description: {str(dog.get('Description', ''))[:500]}
 def send_notification(matches):
     for dog, reason in matches:
         message = f"{dog.get('Name')} ({dog.get('Breed')}, {dog.get('Age')})\n{reason}"
-        url = f"https://www.shelterluv.com/matchme/available/MILO/Dog/{dog.get('ID')}"
+        url = f"https://www.adoptapet.com/pet/{dog.get('ID')}"
         requests.post("https://api.pushover.net/1/messages.json", data={
             "token": PUSHOVER_API_TOKEN,
             "user": PUSHOVER_USER_KEY,
             "message": message,
             "url": url,
-            "url_title": f"View {dog.get('Name')} on Shelterluv"
+            "url_title": f"View {dog.get('Name')} on Adopt-a-Pet"
         })
     print(f"Sent {len(matches)} Pushover notifications")
 
