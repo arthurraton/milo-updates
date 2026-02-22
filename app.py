@@ -9,7 +9,7 @@ st.title("🐾 Dog Finder")
 st.markdown("Find your perfect rescue dog, filtered by AI.")
 
 with st.form("preferences"):
-    name = st.text_input("Your name", value="Austin")
+    user_name = st.text_input("Your name", value="Austin")
     location = st.text_input("Your city", value="San Francisco, CA")
     breed_pref = st.text_input("Breed preference", value="Poodle mix")
     size_pref = st.selectbox("Size", ["Small (under 25 lbs)", "Medium (25-50 lbs)", "Large (50+ lbs)", "Any"])
@@ -42,14 +42,14 @@ if submitted:
             for card in soup.select("a[href*='/pet/']"):
                 href = card.get("href", "")
                 pet_id = href.split("/pet/")[-1].strip("/").split("-")[0]
-                name_el = card.get_text(strip=True)
+                pet_name = card.get_text(strip=True)
                 img = card.find("img")
                 photo = img["src"] if img and img.get("src") else None
-                if pet_id and name_el and pet_id not in seen_ids:
+                if pet_id and pet_name and pet_id not in seen_ids:
                     seen_ids.add(pet_id)
                     dogs.append({
                         "ID": pet_id,
-                        "Name": name_el,
+                        "Name": pet_name,
                         "Photo": photo,
                         "URL": f"https://www.adoptapet.com/pet/{pet_id}"
                     })
@@ -77,7 +77,7 @@ Name: {dog['Name']}
                 matches.append((dog, answer))
             progress.progress((i + 1) / len(dogs))
 
-        st.success(f"Found **{len(matches)}** matches for {name}!")
+        st.success(f"Found **{len(matches)}** matches for {user_name}!")
 
         if matches:
             for dog, reason in matches:
@@ -91,11 +91,3 @@ Name: {dog['Name']}
                 st.divider()
         else:
             st.info("No matches found today. Try adjusting your preferences.")
-```
-
-Then create a `requirements.txt` file in the same repo:
-```
-streamlit
-requests
-beautifulsoup4
-openai
