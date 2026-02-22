@@ -89,8 +89,3 @@ Name: {dog['Name']}
             st.divider()
     else:
         st.info("No matches found today. Try adjusting your preferences.")
-```
-
-After updating the file, go to Streamlit → **Manage app** → **Settings** → **Secrets** and add:
-```
-OPENAI_API_KEY = "your-openai-key-here"
