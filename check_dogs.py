@@ -30,24 +30,35 @@ def mark_seen(conn, dog_id, name):
     conn.commit()
 
 def fetch_dogs():
-    resp = requests.get(
-        "https://www.shelterluv.com/matchme/available/MILO/Dog",
-        headers={"User-Agent": "Mozilla/5.0"}
-    )
-    full_matches = re.findall(
-        r'"InternalID":"(\d+)","Name":"([^"]+)","Type":"[^"]+","PrimaryBreed":"([^"]+)"[^}]*"Age":"([^"]+)"',
-        resp.text
-    )
-    dogs = []
-    for m in full_matches:
-        dogs.append({
-            "ID": m[0],
-            "Name": m[1],
-            "Breed": m[2],
-            "Age": m[3],
-            "Weight": "unknown",
-            "Description": ""
-        })
+    from playwright.sync_api import sync_playwright
+
+    with sync_playwright() as p:
+        browser = p.chromium.launch()
+        page = browser.new_page()
+        dogs = []
+
+        def handle_response(response):
+            if "shelterluv.com/api" in response.url and response.status == 200:
+                try:
+                    data = response.json()
+                    if isinstance(data, dict) and "animals" in data:
+                        for a in data["animals"]:
+                            dogs.append({
+                                "ID": a.get("ID") or a.get("InternalID"),
+                                "Name": a.get("Name"),
+                                "Breed": a.get("Breed") or a.get("PrimaryBreed"),
+                                "Age": a.get("Age"),
+                                "Weight": a.get("Weight", "unknown"),
+                                "Description": a.get("Description", "")
+                            })
+                except:
+                    pass
+
+        page.on("response", handle_response)
+        page.goto("https://www.shelterluv.com/matchme/available/MILO/Dog")
+        page.wait_for_timeout(5000)
+        browser.close()
+
     print(f"Found {len(dogs)} available dogs")
     return dogs
 
