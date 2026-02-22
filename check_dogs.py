@@ -1,6 +1,7 @@
 import requests
 import sqlite3
 import os
+import re
 from datetime import datetime
 
 OPENAI_API_KEY = os.environ["OPENAI_API_KEY"]
@@ -30,12 +31,25 @@ def mark_seen(conn, dog_id, name):
 
 def fetch_dogs():
     resp = requests.get(
-        "https://www.shelterluv.com/api/v1/animals",
-        params={"status": "Available", "type": "Dog", "organization_id": "MILO"},
-        headers={"x-api-key": ""}
+        "https://www.shelterluv.com/matchme/available/MILO/Dog",
+        headers={"User-Agent": "Mozilla/5.0"}
     )
-    data = resp.json()
-    return data.get("animals", [])
+    full_matches = re.findall(
+        r'"InternalID":"(\d+)","Name":"([^"]+)","Type":"[^"]+","PrimaryBreed":"([^"]+)"[^}]*"Age":"([^"]+)"',
+        resp.text
+    )
+    dogs = []
+    for m in full_matches:
+        dogs.append({
+            "ID": m[0],
+            "Name": m[1],
+            "Breed": m[2],
+            "Age": m[3],
+            "Weight": "unknown",
+            "Description": ""
+        })
+    print(f"Found {len(dogs)} available dogs")
+    return dogs
 
 def is_good_match(dog):
     import openai
@@ -74,11 +88,10 @@ def send_notification(matches):
 def main():
     conn = init_db()
     dogs = fetch_dogs()
-    print(f"Found {len(dogs)} available dogs")
     matches = []
 
     for dog in dogs:
-        dog_id = dog.get("ID") or dog.get("id")
+        dog_id = dog.get("ID")
         if not is_new(conn, dog_id):
             continue
         mark_seen(conn, dog_id, dog.get("Name", "Unknown"))
