@@ -8,8 +8,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
-      - run: pip install requests openai playwright
-      - run: playwright install chromium
+      - run: pip install requests openai beautifulsoup4
       - run: python check_dogs.py
     env:
       OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
