@@ -1,14 +1,15 @@
 on:
   schedule:
-    - cron: '0 9 * * *'  # 9am UTC daily
-  workflow_dispatch:  # allows manual trigger from GitHub UI
+    - cron: '0 9 * * *'
+  workflow_dispatch:
 
 jobs:
   check:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
-      - run: pip install requests openai
+      - run: pip install requests openai playwright
+      - run: playwright install chromium
       - run: python check_dogs.py
     env:
       OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
