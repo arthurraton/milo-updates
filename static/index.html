@@ -631,4 +631,58 @@
 
     } catch (err) {
       results.innerHTML = `<div class="error-msg">ERR: something broke. try again.</div>`;
-    } fina
+    } finally {
+      btn.disabled = false;
+      btn.textContent = 'RUN SEARCH →';
+    }
+  });
+
+  // ---- BOUNCING CHILI ----
+  const chili = document.getElementById('chili');
+  let x = Math.random() * (window.innerWidth - 60);
+  let y = Math.random() * (window.innerHeight - 60);
+  let vx = (Math.random() * 2 + 1.5) * (Math.random() > 0.5 ? 1 : -1);
+  let vy = (Math.random() * 2 + 1.5) * (Math.random() > 0.5 ? 1 : -1);
+  const size = 50;
+
+  function animateChili() {
+    x += vx;
+    y += vy;
+    if (x <= 0 || x >= window.innerWidth - size) vx *= -1;
+    if (y <= 0 || y >= window.innerHeight - size) vy *= -1;
+    x = Math.max(0, Math.min(window.innerWidth - size, x));
+    y = Math.max(0, Math.min(window.innerHeight - size, y));
+    chili.style.left = x + 'px';
+    chili.style.top = y + 'px';
+    requestAnimationFrame(animateChili);
+  }
+
+  animateChili();
+
+  // ---- CHILI MODAL ----
+  const modal = document.getElementById('chili-modal');
+  const chiliTitle = document.getElementById('chili-title');
+  const chiliSubtitle = document.getElementById('chili-subtitle');
+  const chiliBody = document.getElementById('chili-body');
+  const chiliLink = document.getElementById('chili-full-link');
+
+  chili.addEventListener('click', async () => {
+    modal.classList.add('open');
+    chiliTitle.textContent = 'LOADING CHILI...';
+    chiliSubtitle.textContent = '';
+    chiliBody.textContent = 'fetching championship recipe...';
+
+    try {
+      const res = await fetch('/random-chili');
+      const data = await res.json();
+      chiliTitle.textContent = '🌶️ CHAMPIONSHIP CHILI';
+      chiliSubtitle.textContent = data.name;
+      chiliBody.textContent = 'Click the link below to view the full recipe from CASI — the Chili Appreciation Society International.';
+      chiliLink.href = data.url;
+    } catch {
+      chiliBody.textContent = 'could not load recipe. try again.';
+    }
+  });
+
+  document.getElementById('chili-close').addEventListener('click', () => {
+    mod
