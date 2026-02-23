@@ -36,7 +36,9 @@ CHILI_RECIPES = [
 
 @app.route("/")
 def index():
-    return send_from_directory(static_dir, "index.html")
+    html_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "static", "index.html")
+    with open(html_path, "r") as f:
+        return f.read(), 200, {"Content-Type": "text/html"}
 
 @app.route("/random-chili")
 def random_chili():
