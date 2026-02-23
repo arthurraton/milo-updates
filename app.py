@@ -4,15 +4,45 @@ import requests
 from bs4 import BeautifulSoup
 import openai
 import os
+import random
 
 app = Flask(__name__, static_folder="static")
 CORS(app)
 
 OPENAI_API_KEY = os.environ.get("OPENAI_API_KEY")
 
+SHELTERS = [
+    {"name": "Milo Foundation", "url": "https://www.adoptapet.com/shelter/73753/available-pets?pet_type_id=1"},
+    {"name": "SF SPCA", "url": "https://www.adoptapet.com/shelter/77882/available-pets?pet_type_id=1"},
+    {"name": "Humane Society Silicon Valley", "url": "https://www.adoptapet.com/shelter/71541/available-pets?pet_type_id=1"},
+    {"name": "East Bay SPCA", "url": "https://www.adoptapet.com/shelter/71640/available-pets?pet_type_id=1"},
+    {"name": "Napa County Animal Shelter", "url": "https://www.adoptapet.com/shelter/73325/available-pets?pet_type_id=1"},
+    {"name": "Central California SPCA", "url": "https://www.adoptapet.com/shelter/73661/available-pets?pet_type_id=1"},
+    {"name": "Marin Humane", "url": "https://www.adoptapet.com/shelter/72210/available-pets?pet_type_id=1"},
+    {"name": "Peninsula Humane Society", "url": "https://www.adoptapet.com/shelter/71603/available-pets?pet_type_id=1"},
+]
+
+CHILI_RECIPES = [
+    {"name": "2025 - Greg Lindsey", "url": "https://www.casichili.net/2025-greg-lindsey.html"},
+    {"name": "2024 - Kevin Casey", "url": "https://www.casichili.net/2024-kevin-casey.html"},
+    {"name": "2023 - Rene Chapa", "url": "https://www.casichili.net/2023-rene-chapa.html"},
+    {"name": "2022 - Kris Hudspeth", "url": "https://www.casichili.net/2022-kris-hudspeth.html"},
+    {"name": "2021 - Becky Allen", "url": "https://www.casichili.net/2021-becky-allen.html"},
+    {"name": "2020 - Chris Pfeiffer", "url": "https://www.casichili.net/2020-chris-pfeiffer.html"},
+    {"name": "2019 - Kathryn Cavender", "url": "https://www.casichili.net/2019-kathryn-cavender.html"},
+    {"name": "2018 - Cody Lee", "url": "https://www.casichili.net/2018-cody-lee.html"},
+    {"name": "2017 - Billy Merritt", "url": "https://www.casichili.net/2017-billy-merritt.html"},
+    {"name": "2016 - Michael McMullen", "url": "https://www.casichili.net/2016-michael-mcmullen.html"},
+]
+
 @app.route("/")
 def index():
     return send_from_directory("static", "index.html")
+
+@app.route("/random-chili")
+def random_chili():
+    recipe = random.choice(CHILI_RECIPES)
+    return jsonify(recipe)
 
 @app.route("/find-dogs", methods=["POST"])
 def find_dogs():
@@ -26,37 +56,39 @@ def find_dogs():
 - IMPORTANT: Only say YES if this is clearly a dog
 """
     try:
-        resp = requests.get(
-            "https://www.adoptapet.com/shelter/73753/available-pets?pet_type_id=1",
-            headers={"User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36"},
-            timeout=10
-        )
-        soup = BeautifulSoup(resp.text, "html.parser")
-        dogs = []
-        seen_ids = set()
+        headers = {"User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36"}
         non_dog_keywords = ["rabbit", "bunny", "cat", "kitten", "guinea", "bird", "hamster"]
+        all_dogs = []
+        seen_ids = set()
 
-        for card in soup.select("a[href*='/pet/']"):
-            href = card.get("href", "")
-            pet_id = href.split("/pet/")[-1].strip("/").split("-")[0]
-            pet_name = card.get_text(strip=True)
-            if any(kw in pet_name.lower() for kw in non_dog_keywords):
+        for shelter in SHELTERS:
+            try:
+                resp = requests.get(shelter["url"], headers=headers, timeout=10)
+                soup = BeautifulSoup(resp.text, "html.parser")
+                for card in soup.select("a[href*='/pet/']"):
+                    href = card.get("href", "")
+                    pet_id = href.split("/pet/")[-1].strip("/").split("-")[0]
+                    pet_name = card.get_text(strip=True)
+                    if any(kw in pet_name.lower() for kw in non_dog_keywords):
+                        continue
+                    img = card.find("img")
+                    photo = img["src"] if img and img.get("src") else None
+                    if pet_id and pet_name and pet_id not in seen_ids:
+                        seen_ids.add(pet_id)
+                        all_dogs.append({
+                            "id": pet_id,
+                            "name": pet_name,
+                            "shelter": shelter["name"],
+                            "photo": photo,
+                            "url": f"https://www.adoptapet.com/pet/{pet_id}"
+                        })
+            except Exception:
                 continue
-            img = card.find("img")
-            photo = img["src"] if img and img.get("src") else None
-            if pet_id and pet_name and pet_id not in seen_ids:
-                seen_ids.add(pet_id)
-                dogs.append({
-                    "id": pet_id,
-                    "name": pet_name,
-                    "photo": photo,
-                    "url": f"https://www.adoptapet.com/pet/{pet_id}"
-                })
 
         client = openai.OpenAI(api_key=OPENAI_API_KEY)
         matches = []
 
-        for dog in dogs:
+        for dog in all_dogs:
             prompt = f"""Given these preferences:
 {preferences}
 
@@ -72,7 +104,7 @@ Name: {dog['name']}
                 dog["reason"] = answer
                 matches.append(dog)
 
-        return jsonify({"matches": matches, "total": len(dogs)})
+        return jsonify({"matches": matches, "total": len(all_dogs)})
 
     except Exception as e:
         return jsonify({"error": str(e)}), 500
