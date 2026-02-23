@@ -1,4 +1,12 @@
-:root {
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>dog.exe</title>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Mono:wght@400;500&family=Instrument+Sans:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+  :root {
     --black: #0a0a0a;
     --white: #f0f0f0;
     --lime: #c8ff00;
@@ -198,7 +206,6 @@
   .loading-bar-inner {
     height: 100%;
     background: linear-gradient(90deg, var(--lime), var(--blue), var(--pink));
-    background-size: 200% 100%;
     animation: loadbar 1.5s ease-in-out infinite;
     width: 60%;
   }
@@ -344,3 +351,168 @@
     .dog-photo, .dog-photo-placeholder { width: 100%; height: 200px; min-width: unset; }
     h1 { font-size: 5rem; }
   }
+</style>
+</head>
+<body>
+
+<div class="marquee-wrap">
+  <span class="marquee-track">
+    🐾 AI DOG MATCHING &nbsp;★&nbsp; RESCUE ONLY &nbsp;★&nbsp; POWERED BY GPT &nbsp;★&nbsp; FIND YOUR BEST FRIEND &nbsp;★&nbsp; 🐾 AI DOG MATCHING &nbsp;★&nbsp; RESCUE ONLY &nbsp;★&nbsp; POWERED BY GPT &nbsp;★&nbsp; FIND YOUR BEST FRIEND &nbsp;★&nbsp; 🐾 AI DOG MATCHING &nbsp;★&nbsp; RESCUE ONLY &nbsp;★&nbsp; POWERED BY GPT &nbsp;★&nbsp; FIND YOUR BEST FRIEND &nbsp;★&nbsp;
+  </span>
+</div>
+
+<header>
+  <h1>
+    <span>FIND</span>
+    <span class="accent">YOUR</span>
+    <span class="stroke">DOG<span class="badge">AI</span></span>
+  </h1>
+  <p class="tagline">// rescue matching · milo foundation · sf bay area</p>
+</header>
+
+<div class="container">
+  <div class="form-card">
+    <form id="search-form">
+      <div class="form-row">
+        <div class="form-group">
+          <label>// your name</label>
+          <input type="text" id="name" value="Austin" placeholder="your name">
+        </div>
+        <div class="form-group">
+          <label>// your city</label>
+          <input type="text" id="location" value="San Francisco, CA" placeholder="city, state">
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label>// breed vibe</label>
+        <input type="text" id="breed" value="Poodle mix or doodle" placeholder="e.g. poodle mix, lab, mutt...">
+      </div>
+
+      <div class="form-row">
+        <div class="form-group">
+          <label>// size</label>
+          <select id="size">
+            <option>Small (under 25 lbs)</option>
+            <option>Medium (25–50 lbs)</option>
+            <option>Large (50+ lbs)</option>
+            <option>Any size</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>// age</label>
+          <select id="age">
+            <option>Puppy (under 1yr)</option>
+            <option>Young (1–3 yrs)</option>
+            <option>Adult (3–8 yrs)</option>
+            <option>Any age</option>
+          </select>
+        </div>
+      </div>
+
+      <label class="checkbox-row">
+        <input type="checkbox" id="otherDogs" checked>
+        <span>// must be good with other dogs</span>
+      </label>
+
+      <div class="form-group">
+        <label>// extra requirements</label>
+        <textarea id="notes" placeholder="low shedding, apartment ok, chill energy..."></textarea>
+      </div>
+
+      <button type="submit" class="submit-btn">RUN SEARCH →</button>
+    </form>
+  </div>
+
+  <div id="results"></div>
+</div>
+
+<div class="corner-deco">dog.exe v1.0</div>
+
+<script>
+  const form = document.getElementById('search-form');
+  const results = document.getElementById('results');
+
+  form.addEventListener('submit', async (e) => {
+    e.preventDefault();
+
+    const btn = form.querySelector('.submit-btn');
+    btn.disabled = true;
+    btn.textContent = 'LOADING...';
+
+    results.innerHTML = `
+      <div class="status">
+        <div class="loading-bar"><div class="loading-bar-inner"></div></div>
+        <p>scraping shelter data + running ai filter<br><span style="color:#333">~30 seconds</span></p>
+      </div>`;
+
+    const payload = {
+      name: document.getElementById('name').value,
+      location: document.getElementById('location').value,
+      breed: document.getElementById('breed').value,
+      size: document.getElementById('size').value,
+      age: document.getElementById('age').value,
+      otherDogs: document.getElementById('otherDogs').checked,
+      notes: document.getElementById('notes').value
+    };
+
+    try {
+      const res = await fetch('/find-dogs', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload)
+      });
+
+      const data = await res.json();
+
+      if (data.error) {
+        results.innerHTML = `<div class="error-msg">ERR: ${data.error}</div>`;
+        return;
+      }
+
+      const matches = data.matches;
+      const name = payload.name;
+
+      if (!matches.length) {
+        results.innerHTML = `
+          <div class="no-results">
+            <div class="big">🐕</div>
+            <p>no matches for ${name} today<br>try loosening your filters</p>
+          </div>`;
+        return;
+      }
+
+      let html = `
+        <div class="results-header">
+          <span class="count">${matches.length}</span> MATCH${matches.length > 1 ? 'ES' : ''} FOR ${name.toUpperCase()}
+        </div>`;
+
+      for (const dog of matches) {
+        const photo = dog.photo
+          ? `<img class="dog-photo" src="${dog.photo}" alt="${dog.name}" onerror="this.style.display='none'">`
+          : `<div class="dog-photo-placeholder">🐶</div>`;
+
+        html += `
+          <div class="dog-card">
+            ${photo}
+            <div class="dog-info">
+              <div class="dog-name"><a href="${dog.url}" target="_blank">${dog.name}</a></div>
+              <p class="dog-reason">${dog.reason}</p>
+              <a href="${dog.url}" target="_blank" class="view-btn">view profile →</a>
+            </div>
+          </div>`;
+      }
+
+      results.innerHTML = html;
+
+    } catch (err) {
+      results.innerHTML = `<div class="error-msg">ERR: something broke. try again.</div>`;
+    } finally {
+      btn.disabled = false;
+      btn.textContent = 'RUN SEARCH →';
+    }
+  });
+</script>
+
+</body>
+</html>
