@@ -278,11 +278,20 @@
     letter-spacing: 1px;
     color: var(--white);
     line-height: 1;
-    margin-bottom: 0.5rem;
+    margin-bottom: 0.25rem;
   }
 
   .dog-name a { color: inherit; text-decoration: none; transition: color 0.15s; }
   .dog-name a:hover { color: var(--lime); }
+
+  .dog-shelter {
+    font-family: 'DM Mono', monospace;
+    font-size: 0.7rem;
+    color: var(--lime);
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    margin-bottom: 0.5rem;
+  }
 
   .dog-reason {
     font-size: 0.85rem;
@@ -344,6 +353,105 @@
     writing-mode: vertical-rl;
   }
 
+  /* BOUNCING CHILI */
+  #chili {
+    position: fixed;
+    font-size: 2.5rem;
+    cursor: pointer;
+    z-index: 1000;
+    user-select: none;
+    filter: drop-shadow(0 0 8px rgba(255,107,0,0.6));
+    transition: transform 0.1s;
+  }
+
+  #chili:hover { transform: scale(1.3) !important; }
+  #chili:active { transform: scale(0.9) !important; }
+
+  /* CHILI MODAL */
+  .chili-modal {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.85);
+    z-index: 2000;
+    align-items: center;
+    justify-content: center;
+    padding: 2rem;
+  }
+
+  .chili-modal.open { display: flex; }
+
+  .chili-modal-inner {
+    background: #0f0f0f;
+    border: 1px solid var(--orange);
+    border-radius: 8px;
+    padding: 2.5rem;
+    max-width: 560px;
+    width: 100%;
+    position: relative;
+    box-shadow: 0 0 40px rgba(255,107,0,0.2);
+  }
+
+  .chili-modal-title {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 2rem;
+    color: var(--orange);
+    letter-spacing: 2px;
+    margin-bottom: 0.25rem;
+  }
+
+  .chili-modal-subtitle {
+    font-family: 'DM Mono', monospace;
+    font-size: 0.75rem;
+    color: #555;
+    letter-spacing: 1px;
+    margin-bottom: 1.5rem;
+  }
+
+  .chili-modal-body {
+    font-family: 'DM Mono', monospace;
+    font-size: 0.85rem;
+    color: #aaa;
+    line-height: 1.8;
+    max-height: 50vh;
+    overflow-y: auto;
+  }
+
+  .chili-modal-footer {
+    margin-top: 1.5rem;
+    display: flex;
+    gap: 0.75rem;
+  }
+
+  .chili-link {
+    display: inline-block;
+    padding: 0.5rem 1.25rem;
+    background: var(--orange);
+    color: var(--black);
+    border: none;
+    border-radius: 2px;
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 1.1rem;
+    letter-spacing: 2px;
+    text-decoration: none;
+    cursor: pointer;
+  }
+
+  .chili-close {
+    display: inline-block;
+    padding: 0.5rem 1.25rem;
+    background: transparent;
+    color: #555;
+    border: 1px solid #333;
+    border-radius: 2px;
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 1.1rem;
+    letter-spacing: 2px;
+    cursor: pointer;
+  }
+
+  .chili-close:hover { color: #888; border-color: #555; }
+
   @media (max-width: 500px) {
     .form-row { grid-template-columns: 1fr; }
     .form-card { padding: 1.5rem 1rem; }
@@ -367,7 +475,7 @@
     <span class="accent">YOUR</span>
     <span class="stroke">DOG<span class="badge">AI</span></span>
   </h1>
-  <p class="tagline">// rescue matching · milo foundation · sf bay area</p>
+  <p class="tagline">// rescue matching · norcal shelters · sf bay area</p>
 </header>
 
 <div class="container">
@@ -429,13 +537,29 @@
 
 <div class="corner-deco">dog.exe v1.0</div>
 
+<!-- BOUNCING CHILI -->
+<div id="chili" title="click for a chili recipe 🌶️">🍲</div>
+
+<!-- CHILI MODAL -->
+<div class="chili-modal" id="chili-modal">
+  <div class="chili-modal-inner">
+    <div class="chili-modal-title" id="chili-title">LOADING CHILI...</div>
+    <div class="chili-modal-subtitle" id="chili-subtitle"></div>
+    <div class="chili-modal-body" id="chili-body">fetching championship recipe...</div>
+    <div class="chili-modal-footer">
+      <a class="chili-link" id="chili-full-link" href="#" target="_blank">FULL RECIPE →</a>
+      <button class="chili-close" id="chili-close">CLOSE</button>
+    </div>
+  </div>
+</div>
+
 <script>
+  // ---- SEARCH ----
   const form = document.getElementById('search-form');
   const results = document.getElementById('results');
 
   form.addEventListener('submit', async (e) => {
     e.preventDefault();
-
     const btn = form.querySelector('.submit-btn');
     btn.disabled = true;
     btn.textContent = 'LOADING...';
@@ -443,7 +567,7 @@
     results.innerHTML = `
       <div class="status">
         <div class="loading-bar"><div class="loading-bar-inner"></div></div>
-        <p>scraping shelter data + running ai filter<br><span style="color:#333">~30 seconds</span></p>
+        <p>scraping 8 shelters + running ai filter<br><span style="color:#333">~60 seconds</span></p>
       </div>`;
 
     const payload = {
@@ -462,7 +586,6 @@
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(payload)
       });
-
       const data = await res.json();
 
       if (data.error) {
@@ -497,6 +620,7 @@
             ${photo}
             <div class="dog-info">
               <div class="dog-name"><a href="${dog.url}" target="_blank">${dog.name}</a></div>
+              <div class="dog-shelter">${dog.shelter}</div>
               <p class="dog-reason">${dog.reason}</p>
               <a href="${dog.url}" target="_blank" class="view-btn">view profile →</a>
             </div>
@@ -507,12 +631,4 @@
 
     } catch (err) {
       results.innerHTML = `<div class="error-msg">ERR: something broke. try again.</div>`;
-    } finally {
-      btn.disabled = false;
-      btn.textContent = 'RUN SEARCH →';
-    }
-  });
-</script>
-
-</body>
-</html>
+    } fina
