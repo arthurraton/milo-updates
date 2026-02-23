@@ -2,6 +2,7 @@ import streamlit as st
 import requests
 from bs4 import BeautifulSoup
 import openai
+import random
 
 OPENAI_API_KEY = st.secrets["OPENAI_API_KEY"]
 
@@ -192,3 +193,32 @@ Name: {dog['Name']}
             st.divider()
     else:
         st.info("No matches found. Try broadening your preferences.")
+
+import random
+
+# Chili recipe footer
+chili_recipes = [
+    ("2025 - Greg Lindsey", "https://www.casichili.net/2025-greg-lindsey.html"),
+    ("2024 - Kevin Casey", "https://www.casichili.net/2024-kevin-casey.html"),
+    ("2023 - Rene Chapa", "https://www.casichili.net/2023-rene-chapa.html"),
+    ("2022 - Kris Hudspeth", "https://www.casichili.net/2022-kris-hudspeth.html"),
+    ("2019 - Kathryn Cavender", "https://www.casichili.net/2019-kathryn-cavender.html"),
+    ("2018 - Tom Dozier", "https://www.casichili.net/2018-tom-dozier.html"),
+    ("2017 - Brent Allen", "https://www.casichili.net/2017-brent-allen.html"),
+    ("2016 - Lisa Stone", "https://www.casichili.net/2016---lisa-stone.html"),
+    ("2015 - James Burns", "https://www.casichili.net/2015-james-burns.html"),
+    ("2014 - Jason Goains", "https://www.casichili.net/2014-jason-goains.html"),
+    ("2013 - Brian Spencer", "https://www.casichili.net/2013-brian-spencer.html"),
+    ("2012 - TJ Cannon", "https://www.casichili.net/2012-t-j-cannon.html"),
+    ("2006 - Dana Plocheck", "https://www.casichili.net/2006-dana-plocheck.html"),
+    ("2005 - Margaret Nadeau", "https://www.casichili.net/2005-margaret-nadeau.html"),
+    ("2004 - Roger Foltz", "https://www.casichili.net/2004-roger-foltz.html"),
+    ("2003 - Honey Jones", "https://www.casichili.net/2003-honey-jones.html"),
+    ("1999 - Bob Coats", "https://www.casichili.net/1999-bob-coats.html"),
+    ("1998 - Carol West", "https://www.casichili.net/1998-carol-west.html"),
+    ("1992 - Cindy Reed", "https://www.casichili.net/1992-cindy-reed.html"),
+]
+
+st.markdown("---")
+recipe_name, recipe_url = random.choice(chili_recipes)
+st.markdown(f"🌶️ **Today's chili recipe:** [{recipe_name}]({recipe_url})")
