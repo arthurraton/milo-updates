@@ -164,7 +164,7 @@ form.addEventListener('submit', function(e) {
     var html = '<div class="results-header"><span class="count">' + matches.length + '</span> MATCH' + (matches.length > 1 ? 'ES' : '') + ' FOR ' + payload.name.toUpperCase() + '</div>';
     for (var i = 0; i < matches.length; i++) {
       var dog = matches[i];
-      var photo = dog.photo ? '<img class="dog-photo" src="' + dog.photo + '" alt="' + dog.name + '" onerror="this.setAttribute(\'style\',\'display:none\')">' : '<div class="dog-photo-placeholder">&#128054;</div>';
+      var photo = dog.photo ? '<img class="dog-photo" src="' + dog.photo + '" alt="' + dog.name + '">' : '<div class="dog-photo-placeholder">&#128054;</div>';
       html += '<div class="dog-card">' + photo + '<div class="dog-info"><div class="dog-name"><a href="' + dog.url + '" target="_blank">' + dog.name + '</a></div><div class="dog-shelter">' + dog.shelter + '</div><p class="dog-reason">' + dog.reason + '</p><a href="' + dog.url + '" target="_blank" class="view-btn">view profile</a></div></div>';
     }
     results.innerHTML = html;
