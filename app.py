@@ -16,11 +16,6 @@ SHELTERS = [
     {"name": "Milo Foundation", "url": "https://www.adoptapet.com/shelter/73753/available-pets?pet_type_id=1"},
     {"name": "SF SPCA", "url": "https://www.adoptapet.com/shelter/77882/available-pets?pet_type_id=1"},
     {"name": "Humane Society Silicon Valley", "url": "https://www.adoptapet.com/shelter/71541/available-pets?pet_type_id=1"},
-    {"name": "East Bay SPCA", "url": "https://www.adoptapet.com/shelter/71640/available-pets?pet_type_id=1"},
-    {"name": "Napa County Animal Shelter", "url": "https://www.adoptapet.com/shelter/73325/available-pets?pet_type_id=1"},
-    {"name": "Central California SPCA", "url": "https://www.adoptapet.com/shelter/73661/available-pets?pet_type_id=1"},
-    {"name": "Marin Humane", "url": "https://www.adoptapet.com/shelter/72210/available-pets?pet_type_id=1"},
-    {"name": "Peninsula Humane Society", "url": "https://www.adoptapet.com/shelter/71603/available-pets?pet_type_id=1"},
 ]
 
 CHILI_RECIPES = [
