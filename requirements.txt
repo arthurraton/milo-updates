@@ -1,4 +1,6 @@
-streamlit
+flask
+flask-cors
 requests
 beautifulsoup4
 openai
+gunicorn
