@@ -120,7 +120,7 @@ def index():
         <div class="form-group"><label>// your name</label><input type="text" id="name" value="Austin"></div>
         <div class="form-group"><label>// your city</label><input type="text" id="location" value="San Francisco, CA"></div>
       </div>
-      <div class="form-group"><label>// breed vibe</label><input type="text" id="breed" value="Poodle mix or doodle"></div>
+      <div class="form-group"><label>// breed vibe</label><input type="text" id="breed" value="" placeholder="poodle mix, lab, any breed...">
       <div class="form-row">
         <div class="form-group"><label>// size</label><select id="size"><option>Small (under 25 lbs)</option><option>Medium (25-50 lbs)</option><option>Large (50+ lbs)</option><option>Any size</option></select></div>
         <div class="form-group"><label>// age</label><select id="age"><option>Puppy (under 1yr)</option><option>Young (1-3 yrs)</option><option>Adult (3-8 yrs)</option><option>Any age</option></select></div>
