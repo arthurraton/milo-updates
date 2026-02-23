@@ -6,8 +6,8 @@ import openai
 import os
 import random
 
-import os
-app = Flask(__name__, static_folder=os.path.join(os.path.dirname(__file__), "static"))
+static_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), "static")
+app = Flask(__name__, static_folder=static_dir)
 CORS(app)
 
 OPENAI_API_KEY = os.environ.get("OPENAI_API_KEY")
@@ -32,24 +32,21 @@ CHILI_RECIPES = [
     {"name": "2020 - Chris Pfeiffer", "url": "https://www.casichili.net/2020-chris-pfeiffer.html"},
     {"name": "2019 - Kathryn Cavender", "url": "https://www.casichili.net/2019-kathryn-cavender.html"},
     {"name": "2018 - Cody Lee", "url": "https://www.casichili.net/2018-cody-lee.html"},
-    {"name": "2017 - Billy Merritt", "url": "https://www.casichili.net/2017-billy-merritt.html"},
-    {"name": "2016 - Michael McMullen", "url": "https://www.casichili.net/2016-michael-mcmullen.html"},
 ]
 
 @app.route("/")
 def index():
-    return send_from_directory(os.path.join(os.path.dirname(__file__), "static"), "index.html")
+    return send_from_directory(static_dir, "index.html")
 
 @app.route("/random-chili")
 def random_chili():
-    recipe = random.choice(CHILI_RECIPES)
-    return jsonify(recipe)
+    return jsonify(random.choice(CHILI_RECIPES))
 
 @app.route("/find-dogs", methods=["POST"])
 def find_dogs():
     data = request.json
     preferences = f"""
-- Looking for: {data.get('breed', 'any dog')} — ONLY dogs, no cats or rabbits
+- Looking for: {data.get('breed', 'any dog')} - ONLY dogs, no cats or rabbits
 - Size: {data.get('size', 'any')}
 - Age: {data.get('age', 'any')}
 - Good with other dogs: {data.get('otherDogs', True)}
