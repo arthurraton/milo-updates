@@ -1,0 +1,346 @@
+:root {
+    --black: #0a0a0a;
+    --white: #f0f0f0;
+    --lime: #c8ff00;
+    --pink: #ff2d78;
+    --blue: #00d4ff;
+    --orange: #ff6b00;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    background: var(--black);
+    color: var(--white);
+    font-family: 'Instrument Sans', sans-serif;
+    min-height: 100vh;
+    overflow-x: hidden;
+    cursor: crosshair;
+  }
+
+  .marquee-wrap {
+    background: var(--lime);
+    color: var(--black);
+    padding: 0.4rem 0;
+    overflow: hidden;
+    white-space: nowrap;
+  }
+
+  .marquee-track {
+    display: inline-block;
+    animation: marquee 12s linear infinite;
+    font-family: 'DM Mono', monospace;
+    font-size: 0.75rem;
+    font-weight: 500;
+    letter-spacing: 1px;
+  }
+
+  @keyframes marquee {
+    0% { transform: translateX(0); }
+    100% { transform: translateX(-50%); }
+  }
+
+  header {
+    padding: 3rem 2rem 1rem;
+    text-align: center;
+  }
+
+  h1 {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: clamp(5rem, 18vw, 12rem);
+    line-height: 0.9;
+    letter-spacing: -2px;
+    color: var(--white);
+  }
+
+  h1 .accent { color: var(--lime); display: block; }
+  h1 .stroke { -webkit-text-stroke: 2px var(--white); color: transparent; display: block; }
+
+  .badge {
+    display: inline-block;
+    background: var(--pink);
+    color: white;
+    font-family: 'DM Mono', monospace;
+    font-size: 0.65rem;
+    padding: 3px 8px;
+    border-radius: 2px;
+    letter-spacing: 2px;
+    vertical-align: super;
+    margin-left: 4px;
+  }
+
+  .tagline {
+    font-family: 'DM Mono', monospace;
+    font-size: 0.8rem;
+    color: #555;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    margin-top: 1rem;
+  }
+
+  .container {
+    max-width: 720px;
+    margin: 0 auto;
+    padding: 0 1.5rem 6rem;
+  }
+
+  .form-card {
+    border: 1px solid #222;
+    border-radius: 4px;
+    padding: 2.5rem;
+    position: relative;
+    background: #0f0f0f;
+    margin-top: 2rem;
+  }
+
+  .form-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1rem;
+  }
+
+  .form-group { margin-bottom: 1.25rem; }
+
+  label {
+    display: block;
+    font-family: 'DM Mono', monospace;
+    font-size: 0.65rem;
+    color: #555;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    margin-bottom: 0.5rem;
+  }
+
+  input, select, textarea {
+    width: 100%;
+    padding: 0.75rem 1rem;
+    background: #161616;
+    border: 1px solid #2a2a2a;
+    border-radius: 2px;
+    color: var(--white);
+    font-family: 'DM Mono', monospace;
+    font-size: 0.85rem;
+    outline: none;
+    transition: border-color 0.15s;
+    -webkit-appearance: none;
+  }
+
+  input:focus, select:focus, textarea:focus {
+    border-color: var(--lime);
+    box-shadow: 0 0 0 2px rgba(200,255,0,0.07);
+  }
+
+  select option { background: #161616; }
+  textarea { resize: vertical; min-height: 80px; }
+
+  .checkbox-row {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    margin-bottom: 1.25rem;
+    padding: 0.75rem 1rem;
+    border: 1px solid #2a2a2a;
+    border-radius: 2px;
+    cursor: pointer;
+    transition: border-color 0.15s;
+  }
+
+  .checkbox-row:hover { border-color: #444; }
+
+  .checkbox-row input[type="checkbox"] {
+    width: 16px; height: 16px;
+    accent-color: var(--lime);
+    cursor: pointer;
+    flex-shrink: 0;
+  }
+
+  .checkbox-row span {
+    font-family: 'DM Mono', monospace;
+    font-size: 0.8rem;
+    color: #aaa;
+  }
+
+  .submit-btn {
+    width: 100%;
+    padding: 1.1rem;
+    background: var(--lime);
+    color: var(--black);
+    border: none;
+    border-radius: 2px;
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 1.6rem;
+    letter-spacing: 3px;
+    cursor: crosshair;
+    transition: background 0.15s, transform 0.1s;
+    margin-top: 0.75rem;
+  }
+
+  .submit-btn:hover { background: #d4ff1a; }
+  .submit-btn:active { transform: scale(0.995); }
+  .submit-btn:disabled { background: #222; color: #444; cursor: not-allowed; }
+
+  .status {
+    text-align: center;
+    padding: 3rem 2rem;
+    color: #444;
+    font-family: 'DM Mono', monospace;
+    font-size: 0.85rem;
+  }
+
+  .loading-bar {
+    width: 100%;
+    height: 2px;
+    background: #1a1a1a;
+    overflow: hidden;
+    margin-bottom: 1.5rem;
+  }
+
+  .loading-bar-inner {
+    height: 100%;
+    background: linear-gradient(90deg, var(--lime), var(--blue), var(--pink));
+    background-size: 200% 100%;
+    animation: loadbar 1.5s ease-in-out infinite;
+    width: 60%;
+  }
+
+  @keyframes loadbar {
+    0% { transform: translateX(-100%); }
+    100% { transform: translateX(250%); }
+  }
+
+  .results-header {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 2.5rem;
+    letter-spacing: 2px;
+    color: var(--white);
+    margin: 2.5rem 0 1.5rem;
+  }
+
+  .results-header .count { color: var(--lime); }
+
+  .dog-card {
+    border: 1px solid #1f1f1f;
+    border-radius: 4px;
+    overflow: hidden;
+    margin-bottom: 1rem;
+    display: flex;
+    background: #0f0f0f;
+    transition: border-color 0.2s, transform 0.2s;
+    position: relative;
+  }
+
+  .dog-card:hover { border-color: var(--lime); transform: translateX(4px); }
+
+  .dog-card::before {
+    content: '';
+    position: absolute;
+    left: 0; top: 0; bottom: 0;
+    width: 3px;
+    background: var(--lime);
+    opacity: 0;
+    transition: opacity 0.2s;
+  }
+
+  .dog-card:hover::before { opacity: 1; }
+
+  .dog-photo {
+    width: 130px;
+    min-width: 130px;
+    object-fit: cover;
+    filter: grayscale(20%);
+    transition: filter 0.2s;
+  }
+
+  .dog-card:hover .dog-photo { filter: grayscale(0%); }
+
+  .dog-photo-placeholder {
+    width: 130px;
+    min-width: 130px;
+    background: #161616;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 3rem;
+  }
+
+  .dog-info { padding: 1.25rem 1.5rem; flex: 1; }
+
+  .dog-name {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 1.8rem;
+    letter-spacing: 1px;
+    color: var(--white);
+    line-height: 1;
+    margin-bottom: 0.5rem;
+  }
+
+  .dog-name a { color: inherit; text-decoration: none; transition: color 0.15s; }
+  .dog-name a:hover { color: var(--lime); }
+
+  .dog-reason {
+    font-size: 0.85rem;
+    color: #666;
+    line-height: 1.6;
+    font-family: 'DM Mono', monospace;
+    margin-bottom: 1rem;
+  }
+
+  .view-btn {
+    display: inline-block;
+    padding: 0.4rem 1rem;
+    background: transparent;
+    border: 1px solid #333;
+    color: #888;
+    border-radius: 2px;
+    font-family: 'DM Mono', monospace;
+    font-size: 0.7rem;
+    letter-spacing: 1px;
+    text-decoration: none;
+    text-transform: uppercase;
+    transition: border-color 0.15s, color 0.15s, background 0.15s;
+  }
+
+  .view-btn:hover { border-color: var(--lime); color: var(--lime); background: rgba(200,255,0,0.05); }
+
+  .no-results {
+    text-align: center;
+    padding: 4rem 2rem;
+    border: 1px solid #1f1f1f;
+    border-radius: 4px;
+    color: #444;
+    font-family: 'DM Mono', monospace;
+    font-size: 0.85rem;
+  }
+
+  .no-results .big { font-size: 3rem; margin-bottom: 1rem; }
+
+  .error-msg {
+    background: rgba(255,45,120,0.1);
+    border: 1px solid var(--pink);
+    color: var(--pink);
+    padding: 1rem;
+    border-radius: 2px;
+    margin-top: 1rem;
+    font-family: 'DM Mono', monospace;
+    font-size: 0.8rem;
+  }
+
+  .corner-deco {
+    position: fixed;
+    bottom: 1.5rem;
+    right: 1.5rem;
+    font-family: 'DM Mono', monospace;
+    font-size: 0.6rem;
+    color: #222;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    writing-mode: vertical-rl;
+  }
+
+  @media (max-width: 500px) {
+    .form-row { grid-template-columns: 1fr; }
+    .form-card { padding: 1.5rem 1rem; }
+    .dog-card { flex-direction: column; }
+    .dog-photo, .dog-photo-placeholder { width: 100%; height: 200px; min-width: unset; }
+    h1 { font-size: 5rem; }
+  }
