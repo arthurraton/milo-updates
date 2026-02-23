@@ -28,8 +28,6 @@ CHILI_RECIPES = [
     {"name": "2024 - Kevin Casey", "url": "https://www.casichili.net/2024-kevin-casey.html"},
     {"name": "2023 - Rene Chapa", "url": "https://www.casichili.net/2023-rene-chapa.html"},
     {"name": "2022 - Kris Hudspeth", "url": "https://www.casichili.net/2022-kris-hudspeth.html"},
-    {"name": "2021 - Becky Allen", "url": "https://www.casichili.net/2021-becky-allen.html"},
-    {"name": "2020 - Chris Pfeiffer", "url": "https://www.casichili.net/2020-chris-pfeiffer.html"},
     {"name": "2019 - Kathryn Cavender", "url": "https://www.casichili.net/2019-kathryn-cavender.html"},
     {"name": "2018 - Cody Lee", "url": "https://www.casichili.net/2018-cody-lee.html"},
 ]
