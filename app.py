@@ -6,7 +6,8 @@ import openai
 import os
 import random
 
-app = Flask(__name__, static_folder="static")
+import os
+app = Flask(__name__, static_folder=os.path.join(os.path.dirname(__file__), "static"))
 CORS(app)
 
 OPENAI_API_KEY = os.environ.get("OPENAI_API_KEY")
@@ -37,7 +38,7 @@ CHILI_RECIPES = [
 
 @app.route("/")
 def index():
-    return send_from_directory("static", "index.html")
+    return send_from_directory(os.path.join(os.path.dirname(__file__), "static"), "index.html")
 
 @app.route("/random-chili")
 def random_chili():
