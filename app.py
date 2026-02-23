@@ -200,14 +200,8 @@ def random_chili():
 @app.route("/find-dogs", methods=["POST"])
 def find_dogs():
     data = request.json
-    preferences = f"""
-- Looking for: {data.get('breed', 'any dog')} - ONLY dogs, no cats or rabbits
-- Size: {data.get('size', 'any')}
-- Age: {data.get('age', 'any')}
-- Good with other dogs: {data.get('otherDogs', True)}
-- Notes: {data.get('notes', '')}
-- IMPORTANT: Only say YES if this is clearly a dog
-"""
+    preferences = f"Breed: {data.get('breed', 'any')} | Size: {data.get('size', 'any')} | Age: {data.get('age', 'any')} | Good with dogs: {data.get('otherDogs', True)} | Notes: {data.get('notes', '')}"
+
     try:
         headers = {"User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36"}
         non_dog_keywords = ["rabbit", "bunny", "cat", "kitten", "guinea", "bird", "hamster"]
@@ -216,17 +210,17 @@ def find_dogs():
 
         for shelter in SHELTERS:
             try:
-                resp = requests.get(shelter["url"], headers=headers, timeout=10)
+                resp = requests.get(shelter["url"], headers=headers, timeout=8)
                 soup = BeautifulSoup(resp.text, "html.parser")
                 for card in soup.select("a[href*='/pet/']"):
                     href = card.get("href", "")
                     pet_id = href.split("/pet/")[-1].strip("/").split("-")[0]
                     pet_name = card.get_text(strip=True)
-                    if any(kw in pet_name.lower() for kw in non_dog_keywords):
+                    if not pet_name or any(kw in pet_name.lower() for kw in non_dog_keywords):
                         continue
                     img = card.find("img")
                     photo = img["src"] if img and img.get("src") else None
-                    if pet_id and pet_name and pet_id not in seen_ids:
+                    if pet_id and pet_id not in seen_ids:
                         seen_ids.add(pet_id)
                         all_dogs.append({
                             "id": pet_id,
@@ -238,24 +232,34 @@ def find_dogs():
             except Exception:
                 continue
 
+        if not all_dogs:
+            return jsonify({"matches": [], "total": 0})
+
+        # Single batch OpenAI call instead of one per dog
+        dog_list = "\n".join([f"{i+1}. {d['name']}" for i, d in enumerate(all_dogs)])
+        prompt = f"""User preferences: {preferences}
+
+Here is a numbered list of dogs available for adoption. Reply with ONLY the numbers of dogs that are a good match, comma-separated. If none match, reply with "none". Only include dogs that clearly match the breed preference.
+
+{dog_list}"""
+
         client = openai.OpenAI(api_key=OPENAI_API_KEY)
+        response = client.chat.completions.create(
+            model="gpt-4o-mini",
+            messages=[{"role": "user", "content": prompt}],
+            max_tokens=200
+        )
+        answer = response.choices[0].message.content.strip()
+
         matches = []
-
-        for dog in all_dogs:
-            prompt = f"""Given these preferences:
-{preferences}
-
-Is this a dog AND a good match? Start with YES or NO, then one sentence why.
-Name: {dog['name']}
-"""
-            response = client.chat.completions.create(
-                model="gpt-4o-mini",
-                messages=[{"role": "user", "content": prompt}]
-            )
-            answer = response.choices[0].message.content
-            if answer.upper().startswith("YES"):
-                dog["reason"] = answer
-                matches.append(dog)
+        if answer.lower() != "none":
+            for part in answer.split(","):
+                part = part.strip()
+                if part.isdigit():
+                    idx = int(part) - 1
+                    if 0 <= idx < len(all_dogs):
+                        all_dogs[idx]["reason"] = "Matches your preferences"
+                        matches.append(all_dogs[idx])
 
         return jsonify({"matches": matches, "total": len(all_dogs)})
 
